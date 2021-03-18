@@ -22,8 +22,17 @@ public class Player {
         this.input = clientSocket.getInputStream();
     }
 
-    public void deployShips() throws Exception {
+    public int[] deployShips() throws Exception {
         throw new Exception("Not implemented yet");
     }
 
+    public int[] makeShot() throws Exception {
+        throw new Exception("Not implemented yet");
+    }
+
+    public boolean getHit() throws Exception {
+        throw new Exception("Not implemented yet");
+    }
+
+    // And maybe add more
 }
