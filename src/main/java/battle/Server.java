@@ -1,28 +1,26 @@
 package battle;
 
-import java.net.Socket;
 import java.net.ServerSocket;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Server implements Runnable {
+public class Server extends Thread {
 
-    static int port = 5005;
-    private final ArrayList<Player> players = new ArrayList<>();
-    private Socket clientSocket;
-    private ServerSocket serverSocket;
-    private List<Thread> gameThreads;
+    private int port = 5005;
+    private final List<Socket> players = new ArrayList<>();
+    private ServerSocket server;
+    private List<Thread> gameThreads = new ArrayList<>();
 
     public static void main(String[] args) {
-        Thread server = new Thread(new Server()) ;
+        Thread server = new Server();
         server.start();
     }
 
     Server() {
         try {
-            serverSocket = new ServerSocket(port);
-            clientSocket = serverSocket.accept();
+            server = new ServerSocket(port);
             System.out.println("Server started!");
         } catch (IOException e) {
             e.printStackTrace();
@@ -36,16 +34,22 @@ public class Server implements Runnable {
                 synchronized (players) {
                     players.clear();
                     while (players.size() < 2) {
-                        players.add(new Player(serverSocket.accept()));
+                        players.add(server.accept());
                         System.out.println("Client connected");
                     }
-                    gameThreads.add(new Thread(
-                            new Game(players.get(0), players.get(1))));
-                    gameThreads.get(gameThreads.size() - 1).start();
+                    gameThreads.add(
+                            new Game(players.get(0), players.get(1)));
+//                    gameThreads.get(gameThreads.size() - 1).start();
                 }
             }
         } catch (IOException exception) {
             exception.printStackTrace();
+        } finally {
+            try {
+                server.close();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
         }
     }
 }
