@@ -31,16 +31,13 @@ public class Server extends Thread {
     public void run() {
         try {
             while (true) {
-                synchronized (players) {
-                    players.clear();
-                    while (players.size() < 2) {
-                        players.add(server.accept());
-                        System.out.println("Client connected");
-                    }
-                    gameThreads.add(
-                            new Game(players.get(0), players.get(1)));
-//                    gameThreads.get(gameThreads.size() - 1).start();
+                players.clear();
+                while (players.size() < 2) {
+                    players.add(server.accept());
+                    System.out.println("Client connected");
                 }
+                gameThreads.add(
+                        new Game(players.get(0), players.get(1)));
             }
         } catch (IOException exception) {
             exception.printStackTrace();

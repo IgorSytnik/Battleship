@@ -27,39 +27,36 @@ public class Game extends Thread {
 
     @Override
     public void run() {
-//        try {
-//            player1.deployShips();
-//            player2.deployShips();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
-
-        boolean hit;
+        boolean hit, sameCell;
 
         try {
-            player1Out.writeBoolean(true);
-            player2Out.writeBoolean(false);
+            if (player1In.readBoolean()) {              // deploy ships
+                if (player2In.readBoolean()) {
+                    System.out.println("Game starts");
+                }
+            }
+            player1Out.writeBoolean(true);  // first to go
+            player2Out.writeBoolean(false); // second to go
             while (cellCountP1 > 0 && cellCountP2 > 0) {
 
                 // Player1 is going first
                 // player1's turn
                 do {
-                    /*
-                    * out.write(success ? 1 : 0);
-                    * boolean success = in.read() != 0;
-                    * */
-//                    player1.makeShot();
                     System.out.println("Player1's turn");
                     // X
                     player2Out.writeInt(player1In.readInt());
                     // Y
                     player2Out.writeInt(player1In.readInt());
-                    hit = player2In.readBoolean();
+                    player2Out.flush();
+                    sameCell = player2In.readBoolean(); // P1 shot in the already shot cell
+                    hit = player2In.readBoolean();  // P2 got hit?
                     player1Out.writeBoolean(hit);
-                    if (hit) {
+                    if (hit && !sameCell) {
                         cellCountP2--;
                     }
+                    player1Out.writeBoolean(cellCountP2 <= 0); // P2 lost?
+                    player1Out.flush();
                 } while (cellCountP1 > 0 && cellCountP2 > 0 && hit);
 
                 if (cellCountP1 <= 0 || cellCountP2 <= 0) break;
@@ -71,11 +68,15 @@ public class Game extends Thread {
                     player1Out.writeInt(player2In.readInt());
                     // Y
                     player1Out.writeInt(player2In.readInt());
+                    player1Out.flush();
+                    sameCell = player1In.readBoolean();
                     hit = player1In.readBoolean();
                     player2Out.writeBoolean(hit);
-                    if (hit) {
+                    if (hit && !sameCell) {
                         cellCountP1--;
                     }
+                    player2Out.writeBoolean(cellCountP1 <= 0); // lost?
+                    player2Out.flush();
                 } while (cellCountP1 > 0 && cellCountP2 > 0 && hit);
 
             }
